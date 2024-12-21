@@ -1,15 +1,18 @@
 import User from '#models/User.js';
-import { ERROR, SUCCESS, response } from '#utils/messages.js';
 
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
     if (users.length === 0) {
-      return response(res, ERROR.USERS.NO_USERS);
+      res.status(400).json({ error: 'Користувачів не знайдено' });
     }
-    return response(res, SUCCESS.USERS.FETCH, { data: users });
-  } catch (err) {
-    return response(res, ERROR.USERS.FETCH, { error: err.message });
+    res
+      .status(200)
+      .json({ message: 'Успішно знайдено користувачів', data: users });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: 'Не вдалося отримати всіх користувачів', error });
   }
 };
 
@@ -19,34 +22,52 @@ export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(id);
     if (!user) {
-      return response(res, ERROR.USER.NOT_FOUND);
+      res
+        .status(400)
+        .json({ error: 'Користувача з таким ідентифікатором не знайдено' });
     }
-    return response(res, SUCCESS.USER.FIND, { data: user });
-  } catch (err) {
-    return response(res, ERROR.USER.FETCH, { error: err.message });
+    res.status(200).json({
+      message: 'Успішно знайдено користувача за ідентифікатором',
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Не вдалось виконати пошук користувача за ідентифікатором',
+      error,
+    });
   }
 };
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { email, faculty, speciality, grade, course, budget } = req.body;
 
-  if (!name) {
-    return response(res, ERROR.USER.USERNAME_REQUIRED, { error: err.message });
+  if (!email || !faculty || !speciality || !grade || !course || !budget) {
+    res
+      .status(400)
+      .json({ error: 'Недостатньо даних для оновлення користувача' });
   }
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { name },
+      { email, faculty, speciality, grade, course, budget },
       { new: true },
     );
     if (!updatedUser) {
-      return response(res, ERROR.USER.NOT_FOUND);
+      res.status(400).json({
+        error:
+          'Не знайдено користувача за ідентифікатором або не вдалось оновити його дані',
+      });
     }
-    return response(res, SUCCESS.USER.UPDATE, { data: updatedUser });
-  } catch (err) {
-    return response(res, ERROR.USER.UPDATE, { error: err.message });
+    res
+      .status(200)
+      .json({ message: 'Користувача успішно оновлено', data: updatedUser });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Не вдалось оновити користувача',
+      error,
+    });
   }
 };
 
@@ -55,8 +76,8 @@ export const deleteUser = async (req, res) => {
 
   try {
     await User.findByIdAndDelete(id);
-    return response(res, SUCCESS.USER.DELETE);
-  } catch (err) {
-    return response(res, ERROR.USER.DELETE, { error: err.message });
+    res.status(200).json({ message: 'Успішно видалено користувача' });
+  } catch (error) {
+    res.status(500).json({ message: 'Не вдалось видалити користувача', error });
   }
 };

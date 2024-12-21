@@ -3,58 +3,61 @@ import jwt from 'jsonwebtoken';
 
 import { JWT_SECRET } from '#config/env.js';
 import User from '#models/User.js';
-import { ERROR, SUCCESS, response } from '#utils/messages.js';
 
 export const createUser = async (req, res) => {
-  const { name, password, superuser } = req.body;
+  const { fullname, email, password } = req.body;
 
-  if (!name || !password) {
-    return response(res, ERROR.AUTH.CREDENTIALS_REQUIRED);
+  if (!fullname || !email || !password) {
+    res.status(404).json({
+      error: "Будь ласка, введіть ваше ім'я, прізвище, пошту та пароль",
+    });
   }
 
   try {
-    const existsUsername = await User.findOne({ name });
-    if (existsUsername) {
-      return response(res, ERROR.USER.USERNAME_EXISTS);
+    const existsEmail = await User.findOne({ email });
+    if (existsEmail) {
+      res.status(400).json({ error: 'Пошта вже існує!' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, password: hashedPassword, superuser });
+    const newUser = new User({ fullname, email, password: hashedPassword });
     await newUser.save();
-
-    return response(res, SUCCESS.AUTH.CREATE);
-  } catch (err) {
-    return response(res, ERROR.AUTH.CREATE, { error: err.message });
+    res.json({ message: 'Успішно створено користувача' });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: 'Не вдалося створити нового користувача', error });
   }
 };
 
 export const loginUser = async (req, res) => {
-  const { name, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!name || !password) {
-    return response(res, ERROR.AUTH.NAME_PASSWORD_REQUIRED);
+  if (!email || !password) {
+    res.status(400).json({ error: 'Будь ласка, введіть вашу пошту та пароль' });
   }
 
   try {
-    const user = await User.findOne({ name });
+    const user = await User.findOne({ email });
     if (!user) {
-      return response(res, ERROR.USER.NOT_FOUND);
+      res.status(400).json({ error: 'Користувача з такою поштою не існує!' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return response(res, ERROR.AUTH.INVALID_PASSWORD);
+      res.status(400).json({ error: 'Пароль невірний!' });
     }
 
-    const token = jwt.sign({ userId: user._id, name: user.name }, JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      JWT_SECRET,
+      {
+        expiresIn: '1h',
+      },
+    );
 
-    return response(res, SUCCESS.AUTH.LOGIN, {
-      token,
-      id: user._id,
-    });
-  } catch (err) {
-    return response(res, ERROR.AUTH.LOGIN, { error: err.message });
+    res.json({ message: 'Успішно виконано вхід', data: token });
+  } catch (error) {
+    res.status(500).json({ error: 'Не вдалося увійти', error });
   }
 };
