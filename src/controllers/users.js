@@ -4,13 +4,13 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
     if (users.length === 0) {
-      res.status(400).json({ error: 'Користувачів не знайдено' });
+      return res.status(400).json({ error: 'Користувачів не знайдено' });
     }
-    res
+    return res
       .status(200)
       .json({ message: 'Успішно знайдено користувачів', data: users });
   } catch (error) {
-    res
+    return res
       .status(500)
       .json({ error: 'Не вдалося отримати всіх користувачів', error });
   }
@@ -22,16 +22,16 @@ export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(id);
     if (!user) {
-      res
+      return res
         .status(400)
         .json({ error: 'Користувача з таким ідентифікатором не знайдено' });
     }
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Успішно знайдено користувача за ідентифікатором',
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Не вдалось виконати пошук користувача за ідентифікатором',
       error,
     });
@@ -43,7 +43,7 @@ export const updateUser = async (req, res) => {
   const { email, faculty, speciality, grade, course, budget } = req.body;
 
   if (!email || !faculty || !speciality || !grade || !course || !budget) {
-    res
+    return res
       .status(400)
       .json({ error: 'Недостатньо даних для оновлення користувача' });
   }
@@ -55,16 +55,16 @@ export const updateUser = async (req, res) => {
       { new: true },
     );
     if (!updatedUser) {
-      res.status(400).json({
+      return res.status(400).json({
         error:
           'Не знайдено користувача за ідентифікатором або не вдалось оновити його дані',
       });
     }
-    res
+    return res
       .status(200)
       .json({ message: 'Користувача успішно оновлено', data: updatedUser });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: 'Не вдалось оновити користувача',
       error,
     });
@@ -76,8 +76,10 @@ export const deleteUser = async (req, res) => {
 
   try {
     await User.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Успішно видалено користувача' });
+    return res.status(200).json({ message: 'Успішно видалено користувача' });
   } catch (error) {
-    res.status(500).json({ message: 'Не вдалось видалити користувача', error });
+    return res
+      .status(500)
+      .json({ message: 'Не вдалось видалити користувача', error });
   }
 };
