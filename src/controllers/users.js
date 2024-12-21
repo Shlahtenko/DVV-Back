@@ -26,10 +26,7 @@ export const getUserById = async (req, res) => {
         .status(400)
         .json({ error: 'Користувача з таким ідентифікатором не знайдено' });
     }
-    return res.status(200).json({
-      message: 'Успішно знайдено користувача за ідентифікатором',
-      data: user,
-    });
+    return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({
       error: 'Не вдалось виконати пошук користувача за ідентифікатором',
@@ -40,20 +37,31 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { email, faculty, speciality, grade, course, budget } = req.body;
+  const { email, faculty, specialty, grade, course, form } = req.body;
 
-  if (!email || !faculty || !speciality || !grade || !course || !budget) {
+  const updateData = {};
+
+  // this is so fucking cringe i want to kms pls refactor later
+
+  if (email) updateData.email = email;
+  if (faculty) updateData.faculty = faculty;
+  if (specialty) updateData.specialty = specialty;
+  if (grade) updateData.grade = grade;
+  if (course) updateData.course = course;
+  if (form) updateData.form = form;
+
+  console.log(updateData);
+
+  if (Object.keys(updateData).length === 0) {
     return res
       .status(400)
       .json({ error: 'Недостатньо даних для оновлення користувача' });
   }
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { email, faculty, speciality, grade, course, budget },
-      { new: true },
-    );
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
     if (!updatedUser) {
       return res.status(400).json({
         error:
