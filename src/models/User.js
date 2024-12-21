@@ -5,11 +5,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
   faculty: { type: String },
-  speciality: { type: String },
+  specialty: { type: String },
   grade: { type: String },
   course: { type: String },
-  budget: { type: Boolean },
-  // votedSubjects: {[type: String]},
+  form: { type: String },
 });
 const User = mongoose.model('User', userSchema);
 
