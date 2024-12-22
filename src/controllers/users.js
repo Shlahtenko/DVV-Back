@@ -37,20 +37,10 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { email, faculty, specialty, grade, course, form } = req.body;
 
-  const updateData = {};
-
-  // this is so fucking cringe i want to kms pls refactor later
-
-  if (email) updateData.email = email;
-  if (faculty) updateData.faculty = faculty;
-  if (specialty) updateData.specialty = specialty;
-  if (grade) updateData.grade = grade;
-  if (course) updateData.course = course;
-  if (form) updateData.form = form;
-
-  console.log(updateData);
+  const updateData = Object.fromEntries(
+    Object.entries(req.body).filter(([_, value]) => value),
+  );
 
   if (Object.keys(updateData).length === 0) {
     return res

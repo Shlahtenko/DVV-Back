@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   grade: { type: String },
   course: { type: String },
   form: { type: String },
+  votedSubjects: { type: [String], default: [] },
 });
 const User = mongoose.model('User', userSchema);
 
