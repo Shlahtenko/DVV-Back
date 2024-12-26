@@ -68,16 +68,3 @@ export const updateUser = async (req, res) => {
     });
   }
 };
-
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await User.findByIdAndDelete(id);
-    return res.status(200).json({ message: 'Успішно видалено користувача' });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: 'Не вдалось видалити користувача', error });
-  }
-};

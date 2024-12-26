@@ -8,7 +8,7 @@ export const createUser = async (req, res) => {
   const { fullname, email, password } = req.body;
 
   if (!fullname || !email || !password) {
-    return res.status(404).json({
+    return res.status(400).json({
       error: "Будь ласка, введіть ваше ім'я, прізвище, пошту та пароль",
     });
   }
